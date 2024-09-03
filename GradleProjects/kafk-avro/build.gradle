@@ -1,0 +1,78 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.6'
+//	id "com.commercehub.gradle.plugin.avro" version "0.9.0"
+	id "com.github.davidmc24.gradle.plugin.avro" version '1.3.0'
+
+
+
+ }
+
+group = 'com.nani'
+version = '0.0.1-SNAPSHOT'
+
+//java {
+//	toolchain {
+//		languageVersion = JavaLanguageVersion.of(17)
+//	}
+//}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+//
+//plugins {
+//	id 'groovy'
+//	id 'com.commercehub.gradle.plugin.avro' version '0.21.0' // Avro plugin for code generation
+//}
+
+repositories {
+	mavenCentral()
+	maven {
+		url 'https://packages.confluent.io/maven/'
+	}
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.kafka:spring-kafka'
+	// Avro dependencies
+//	implementation 'org.apache.avro:avro:1.12.0'
+
+	implementation 'org.apache.avro:avro:1.11.0'
+	// Confluent Kafka Avro Serializer
+	implementation 'io.confluent:kafka-avro-serializer:7.5.0'
+
+	// Confluent Schema Registry client
+	implementation 'io.confluent:kafka-schema-registry-client:7.5.0'
+
+	// Kafka clients
+	implementation 'org.apache.kafka:kafka-clients:3.6.0'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+generateAvroJava {
+	source('src/main/resources/avro')
+	outputDir = layout.buildDirectory.dir('kafka-avro/src/main/java').get().asFile
+//	stringType = "String"
+}
+
+sourceSets {
+	main {
+		java {
+			srcDirs 'src/main/java', layout.buildDirectory.dir('kafka-avro/src/main/java').get().asFile
+		}
+	}
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
